@@ -101,7 +101,8 @@ async function fetchPageHtml(teamId: string, game: GameId): Promise<string> {
 
 /**
  * Fetches every watched page, one after the other. A failed page is logged and
- * listed in `failures`, so a run still posts what it has.
+ * listed in `failures`, so a run still posts what it has. When every page
+ * fails, it throws instead: the run fails and GitHub sends an email.
  *
  * The Liquipedia ToS allow at most one action=parse request every 30 seconds,
  * hence the pause between two pages.
@@ -131,6 +132,10 @@ export async function getMatches(from: Date): Promise<{ matches: Match[]; failur
       );
       failures.push(`${teamId} (${game})`);
     }
+  }
+
+  if (failures.length === pages.length) {
+    throw new Error('Toutes les pages Liquipedia sont en échec, rien à poster.');
   }
 
   return { matches, failures };

@@ -6,7 +6,7 @@ import { first, makeMatch } from './helpers.ts';
 const DAY = new Date('2026-09-24T12:00:00.000Z');
 
 describe('buildPayload: the Discord message of the day', () => {
-  it('each game gets its own field, with its matches at Paris time, a bracket link and Liquipedia credited', () => {
+  it('a game with matches gets its own field, at Paris time, with a bracket link and Liquipedia credited', () => {
     const matches = [
       makeMatch({ date: new Date('2026-09-24T10:00:00.000Z') }),
       makeMatch({ date: new Date('2026-09-24T18:00:00.000Z'), teamRight: 'Team Vitality' }),
@@ -17,10 +17,6 @@ describe('buildPayload: the Discord message of the day', () => {
     assert.equal(embed.description, undefined);
     assert.equal(embed.footer.text, 'Source : Liquipedia (CC BY-SA 3.0)');
     assert.match(embed.thumbnail.url, /\/assets\/kc-logo\.png$/);
-    assert.deepEqual(
-      embed.fields.map((field) => field.name),
-      ['League of Legends', 'Rocket League', 'Valorant', 'Teamfight Tactics'],
-    );
 
     const lol = first(embed.fields);
     assert.match(lol.value, /12:00 — ⚔️ Karmine Corp vs G2 Esports/);
@@ -41,12 +37,21 @@ describe('buildPayload: the Discord message of the day', () => {
     assert.match(lol.value, /🕙 00:30 \(demain\) — ⚔️ Karmine Corp vs G2 Esports/);
   });
 
-  it('a game with no match today shows "Aucun match."', () => {
+  it('a day with no match posts "Aucun match trouvé pour aujourd\'hui." and no field', () => {
     const embed = first(buildPayload([], [], DAY).embeds);
 
-    const rl = embed.fields.find((field) => field.name === 'Rocket League');
-    assert.ok(rl);
-    assert.equal(rl.value, 'Aucun match.');
+    assert.equal(embed.description, "Aucun match trouvé pour aujourd'hui.");
+    assert.deepEqual(embed.fields, []);
+  });
+
+  it('only the games with matches get a field, in the usual game order', () => {
+    const matches = [makeMatch({ game: 'valorant' }), makeMatch({ game: 'leagueoflegends' })];
+    const embed = first(buildPayload(matches, [], DAY).embeds);
+
+    assert.deepEqual(
+      embed.fields.map((field) => field.name),
+      ['League of Legends', 'Valorant'],
+    );
   });
 
   it('pages that failed to load are listed on top, and the matches found still show', () => {

@@ -38,14 +38,14 @@ function gameField(label: string, matches: readonly Match[], day: string): Embed
     `🕙 ${parisTime(match.date)}${parisDay(match.date) === day ? '' : ' (demain)'} — ⚔️ ${match.teamLeft} vs ${match.teamRight}`,
     `> 🏆 ${match.tournament.name}${match.tournament.link ? ` · 🔗 [Bracket](${match.tournament.link})` : ''}`,
   ]);
-  return { name: label, value: truncate(lines.join('\n')) || 'Aucun match.' };
+  return { name: label, value: truncate(lines.join('\n')) };
 }
 
 /**
  * Builds the webhook payload for one day.
  *
- * Each game gets one field, even with no match. Failed pages are listed in the
- * description, above the fields. The footer credits Liquipedia, as its CC BY-SA
+ * Only the games with matches get a field. With no match at all, the
+ * description says so. Failed pages are listed in the description too. The footer credits Liquipedia, as its CC BY-SA
  * license requires. The title says "du jour" when the target is today in Paris.
  */
 export function buildPayload(
@@ -59,17 +59,18 @@ export function buildPayload(
     color: COLOR_BLUE,
     footer: { text: 'Source : Liquipedia (CC BY-SA 3.0)' },
     thumbnail: { url: KC_LOGO_URL },
-    fields: Object.entries(GAME_LABELS).map(([game, label]) =>
-      gameField(
-        label,
-        matches.filter((match) => match.game === game),
-        day,
-      ),
-    ),
+    fields: Object.entries(GAME_LABELS).flatMap(([game, label]) => {
+      const gameMatches = matches.filter((match) => match.game === game);
+      return gameMatches.length > 0 ? [gameField(label, gameMatches, day)] : [];
+    }),
   };
 
-  if (failures.length > 0) {
-    embed.description = `⚠️ Pages Liquipedia en échec : ${failures.join(', ')}.`;
+  const notes: string[] = [];
+  if (matches.length === 0) notes.push("Aucun match trouvé pour aujourd'hui.");
+  if (failures.length > 0) notes.push(`⚠️ Pages Liquipedia en échec : ${failures.join(', ')}.`);
+
+  if (notes.length > 0) {
+    embed.description = notes.join('\n');
   }
 
   return { embeds: [embed] };

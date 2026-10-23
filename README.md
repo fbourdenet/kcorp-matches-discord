@@ -6,7 +6,7 @@ Poste chaque jour les matchs de la Karmine Corp dans un salon Discord, via un we
 
 1. Le script interroge l'API MediaWiki de Liquipedia pour les 8 pages d'équipe listées dans `src/config.ts`.
 2. Il garde les matchs des 24 heures qui suivent le lancement, les trie, et note les pages Liquipedia en échec.
-3. Il poste un embed dans le salon via `DISCORD_WEBHOOK_URL`.
+3. Il poste un embed dans le salon via `DISCORD_WEBHOOK_URL`, avec un champ par jeu qui a des matchs. Sans aucun match, l'embed indique « Aucun match trouvé pour aujourd'hui. ». Si toutes les pages Liquipedia sont en échec, il ne poste rien : le run échoue et GitHub envoie un mail.
 
 Compte environ 3 min 30 par exécution, à cause de la limite Liquipedia d'une requête `action=parse` toutes les 30 secondes.
 
@@ -65,7 +65,7 @@ Le code suit le [Google TypeScript Style Guide](https://google.github.io/stylegu
 | `src/date.ts` | Helpers Europe/Paris |
 | `src/match.ts` | Tri des matchs |
 | `src/liquipedia.ts` | Fetch des pages et parsing du carrousel Liquipedia |
-| `src/webhook.ts` | Payload : un champ par jeu, POST Discord |
+| `src/webhook.ts` | Payload : un champ par jeu avec des matchs, POST Discord |
 
 ## Crédits
 
