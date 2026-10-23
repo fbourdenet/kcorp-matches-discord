@@ -13,7 +13,8 @@ import { buildPayload, sendPayload } from './webhook.ts';
  * at another date, past or future.
  *
  * The Liquipedia ToS require a User-Agent with a contact. It has no default, so
- * that no personal contact ends up in the repo.
+ * that no personal contact ends up in the repo. An invalid TARGET_DATE stops the
+ * run before any request, since every date comparison with it would be false.
  */
 
 if (!config.userAgent) {
@@ -25,6 +26,12 @@ if (!config.dryRun && !config.webhookUrl) {
 }
 
 const date = config.targetDate ?? new Date();
+
+if (Number.isNaN(date.getTime())) {
+  throw new Error(
+    `TARGET_DATE invalide : ${process.env.TARGET_DATE}. Exemple : 2026-09-24T08:00:00+02:00.`,
+  );
+}
 
 const { matches, failures } = await getMatches(date);
 const sortedMatches = sortMatches(matches);

@@ -27,9 +27,15 @@ function truncate(value: string): string {
   return `${value.slice(0, value.lastIndexOf('\n', MAX_FIELD_LENGTH - 2))}\n…`;
 }
 
-function gameField(label: string, matches: readonly Match[]): EmbedField {
+/**
+ * Lists the matches of one game, two lines each.
+ *
+ * The 24 h window runs past midnight, so a match on the next Paris day gets
+ * "(demain)". Without it, 00:30 under a recap "du jour" reads as this morning.
+ */
+function gameField(label: string, matches: readonly Match[], day: string): EmbedField {
   const lines = matches.flatMap((match) => [
-    `🕙 ${parisTime(match.date)} — ⚔️ ${match.teamLeft} vs ${match.teamRight}`,
+    `🕙 ${parisTime(match.date)}${parisDay(match.date) === day ? '' : ' (demain)'} — ⚔️ ${match.teamLeft} vs ${match.teamRight}`,
     `> 🏆 ${match.tournament.name}${match.tournament.link ? ` · 🔗 [Bracket](${match.tournament.link})` : ''}`,
   ]);
   return { name: label, value: truncate(lines.join('\n')) || 'Aucun match.' };
@@ -57,6 +63,7 @@ export function buildPayload(
       gameField(
         label,
         matches.filter((match) => match.game === game),
+        day,
       ),
     ),
   };

@@ -34,6 +34,13 @@ describe('buildPayload: the Discord message of the day', () => {
     assert.equal(embed.title, 'Récap des matchs KC du jour');
   });
 
+  it('a match after midnight in Paris is marked "(demain)"', () => {
+    const tonight = makeMatch({ date: new Date('2026-09-24T22:30:00.000Z') });
+    const lol = first(first(buildPayload([tonight], [], DAY).embeds).fields);
+
+    assert.match(lol.value, /🕙 00:30 \(demain\) — ⚔️ Karmine Corp vs G2 Esports/);
+  });
+
   it('a game with no match today shows "Aucun match."', () => {
     const embed = first(buildPayload([], [], DAY).embeds);
 
