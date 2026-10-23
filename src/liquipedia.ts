@@ -102,7 +102,8 @@ async function fetchPageHtml(teamId: string, game: GameId): Promise<string> {
 /**
  * Fetches every watched page, one after the other. A failed page is logged and
  * listed in `failures`, so a run still posts what it has. When every page
- * fails, it throws instead: the run fails and GitHub sends an email.
+ * fails, it throws instead, so the run exits with code 1 and the scheduler can
+ * report it.
  *
  * The Liquipedia ToS allow at most one action=parse request every 30 seconds,
  * hence the pause between two pages.

@@ -86,8 +86,8 @@ export function buildPayload(
 /**
  * Posts the payload to a Discord webhook.
  *
- * shortcut: no retry. Ceiling: a Discord 5xx or 429 loses the post; re-run the
- * workflow manually. Upgrade: honor Retry-After and retry once.
+ * shortcut: no retry. Ceiling: a Discord 5xx or 429 loses the post; run it again
+ * by hand. Upgrade: honor Retry-After and retry once.
  */
 export async function sendPayload(webhookUrl: string, payload: WebhookPayload): Promise<void> {
   const response = await fetch(webhookUrl, {

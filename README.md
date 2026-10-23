@@ -6,7 +6,7 @@ Poste chaque jour les matchs de la Karmine Corp dans un salon Discord, via un we
 
 1. Le script interroge l'API MediaWiki de Liquipedia pour les 8 pages d'équipe listées dans `src/config.ts`.
 2. Il garde les matchs des 24 heures qui suivent le lancement, les trie, et note les pages Liquipedia en échec.
-3. Il poste un embed dans le salon via `DISCORD_WEBHOOK_URL`, avec un champ par jeu qui a des matchs. Sans aucun match, l'embed indique « Aucun match trouvé pour aujourd'hui. ». Si toutes les pages Liquipedia sont en échec, il ne poste rien : le run échoue et GitHub envoie un mail.
+3. Il poste un embed dans le salon via `DISCORD_WEBHOOK_URL`, avec un champ par jeu qui a des matchs. Sans aucun match, l'embed indique « Aucun match trouvé pour aujourd'hui. ». Si toutes les pages Liquipedia sont en échec, il ne poste rien et sort avec le code 1.
 
 Compte environ 3 min 30 par exécution, à cause de la limite Liquipedia d'une requête `action=parse` toutes les 30 secondes.
 
@@ -31,15 +31,16 @@ Pour viser une autre date, passée ou future, donne le début de la fenêtre de 
 TARGET_DATE=2026-09-24T08:00:00+02:00 npm start
 ```
 
-## Déploiement sur GitHub Actions
+## Déploiement sur un serveur
 
-`.github/workflows/daily.yml` tourne chaque jour à 8h, heure de Paris, et peut être lancé à la main avec une date cible.
+Le post quotidien tourne sur un serveur à soi, par exemple un NAS. Liquipedia refuse les requêtes venant de GitHub Actions avec un 429, alors qu'il accepte une adresse IP de particulier.
 
-1. Pousse le repo sur GitHub.
-2. Settings, Secrets and variables, Actions, New repository secret : `DISCORD_WEBHOOK_URL`.
-3. Un second secret `LIQUIPEDIA_USER_AGENT`, par exemple `KcorpMatchesDiscord/1.0 (contact@example.com)`. C'est un secret et pas une variable, car les logs d'un repo public affichent les variables en clair.
+1. `git clone https://github.com/fbourdenet/kcorp-matches-discord.git`
+2. `cp .env.example .env`, remplis `DISCORD_WEBHOOK_URL` et `LIQUIPEDIA_USER_AGENT`, puis `chmod 600 .env`.
+3. Planifie chaque jour à 8h, heure de Paris, la commande `git pull --ff-only && npm ci --omit=dev && npm start`, lancée dans le dossier du projet avec Node 22.18 ou plus récent.
+4. Active la notification d'échec de la tâche planifiée : le script sort avec le code 1 si le post échoue.
 
-Deux limites GitHub. Un run planifié peut partir en retard quand GitHub est chargé, surtout en début d'heure. Et les workflows planifiés d'un repo public peuvent être désactivés après 60 jours sans activité.
+Il n'y a pas d'étape de déploiement. Chaque run commence par `git pull --ff-only`, donc le serveur utilise toujours le dernier `main`, validé par la CI GitHub. Le serveur fait seulement des connexions sortantes, vers GitHub, Liquipedia et Discord.
 
 ## Commandes
 
