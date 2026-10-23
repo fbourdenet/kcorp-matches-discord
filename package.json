@@ -1,0 +1,39 @@
+{
+  "name": "kcorp-matches-discord",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Poste chaque jour les matchs de la Karmine Corp dans un salon Discord, via un simple webhook.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env src/index.ts",
+    "test": "node --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "check": "biome check .",
+    "check:fix": "biome check --write ."
+  },
+  "keywords": [
+    "karmine-corp",
+    "liquipedia",
+    "discord",
+    "webhook",
+    "esports"
+  ],
+  "author": "Florian Bourdenet",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fbourdenet/kcorp-matches-discord.git"
+  },
+  "dependencies": {
+    "cheerio": "^1.2.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.15",
+    "@types/node": "^22.20.5",
+    "domhandler": "^5.0.3",
+    "typescript": "^5.9.3"
+  }
+}
