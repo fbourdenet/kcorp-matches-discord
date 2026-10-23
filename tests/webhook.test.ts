@@ -19,8 +19,11 @@ describe('buildPayload: the Discord message of the day', () => {
     assert.match(embed.thumbnail.url, /\/assets\/kc-logo\.png$/);
 
     const lol = first(embed.fields);
-    assert.match(lol.value, /12:00 — ⚔️ Karmine Corp vs G2 Esports/);
-    assert.match(lol.value, /20:00 — ⚔️ Karmine Corp vs Team Vitality/);
+    assert.match(
+      lol.value,
+      /🕙 12:00\n⚔️ Karmine Corp vs G2 Esports\n🏆 LEC 2026 Summer Playoffs\n🔗 \[Bracket\]/,
+    );
+    assert.match(lol.value, /🕙 20:00\n⚔️ Karmine Corp vs Team Vitality/);
     assert.match(lol.value, /🔗 \[Bracket\]\(https:\/\/liquipedia\.net\/leagueoflegends\/LEC\)/);
   });
 
@@ -34,7 +37,7 @@ describe('buildPayload: the Discord message of the day', () => {
     const tonight = makeMatch({ date: new Date('2026-09-24T22:30:00.000Z') });
     const lol = first(first(buildPayload([tonight], [], DAY).embeds).fields);
 
-    assert.match(lol.value, /🕙 00:30 \(demain\) — ⚔️ Karmine Corp vs G2 Esports/);
+    assert.match(lol.value, /🕙 00:30 \(demain\)\n⚔️ Karmine Corp vs G2 Esports/);
   });
 
   it('a day with no match posts "Aucun match trouvé pour aujourd\'hui." and no field', () => {
@@ -59,7 +62,7 @@ describe('buildPayload: the Discord message of the day', () => {
     const embed = first(buildPayload([makeMatch()], failures, DAY).embeds);
 
     assert.match(embed.description ?? '', /⚠️ .*Karmine_Corp \(valorant\), Karmine_Corp_GC/);
-    assert.match(first(embed.fields).value, /20:30 — ⚔️ Karmine Corp vs G2 Esports/);
+    assert.match(first(embed.fields).value, /🕙 20:30\n⚔️ Karmine Corp vs G2 Esports/);
   });
 
   it('a game with 10 matches is cut to stay under the Discord limit of 1024 characters', () => {

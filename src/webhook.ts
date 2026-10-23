@@ -20,25 +20,32 @@ const GAME_LABELS: Record<GameId, string> = {
 
 /**
  * Keeps a field value under the Discord limit, above which Discord rejects the
- * whole post. It cuts on a line break so a markdown link is never split.
+ * whole post. It cuts on the blank line between two matches, so a match is
+ * never split.
  */
 function truncate(value: string): string {
   if (value.length <= MAX_FIELD_LENGTH) return value;
-  return `${value.slice(0, value.lastIndexOf('\n', MAX_FIELD_LENGTH - 2))}\n…`;
+  return `${value.slice(0, value.lastIndexOf('\n\n', MAX_FIELD_LENGTH - 2))}\n…`;
 }
 
 /**
- * Lists the matches of one game, two lines each.
+ * Lists the matches of one game: time, teams, tournament and bracket link, one
+ * per line, with a blank line between two matches.
  *
  * The 24 h window runs past midnight, so a match on the next Paris day gets
  * "(demain)". Without it, 00:30 under a recap "du jour" reads as this morning.
  */
 function gameField(label: string, matches: readonly Match[], day: string): EmbedField {
-  const lines = matches.flatMap((match) => [
-    `🕙 ${parisTime(match.date)}${parisDay(match.date) === day ? '' : ' (demain)'} — ⚔️ ${match.teamLeft} vs ${match.teamRight}`,
-    `> 🏆 ${match.tournament.name}${match.tournament.link ? ` · 🔗 [Bracket](${match.tournament.link})` : ''}`,
-  ]);
-  return { name: label, value: truncate(lines.join('\n')) };
+  const blocks = matches.map((match) => {
+    const lines = [
+      `🕙 ${parisTime(match.date)}${parisDay(match.date) === day ? '' : ' (demain)'}`,
+      `⚔️ ${match.teamLeft} vs ${match.teamRight}`,
+      `🏆 ${match.tournament.name}`,
+    ];
+    if (match.tournament.link) lines.push(`🔗 [Bracket](${match.tournament.link})`);
+    return lines.join('\n');
+  });
+  return { name: label, value: truncate(blocks.join('\n\n')) };
 }
 
 /**
