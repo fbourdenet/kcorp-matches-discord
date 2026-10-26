@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { describe, it } from 'node:test';
 import { parseMatches } from '../src/liquipedia.ts';
 import { first } from './helpers.ts';
@@ -56,6 +57,35 @@ function item(options: ItemOptions = {}): string {
 function page(items: string): string {
   return `<html><body><div class="carousel"><div class="carousel-content">${items}</div></div></body></html>`;
 }
+
+/**
+ * Team pages saved from Liquipedia on 2026-10-26, the morning of KC vs BLG at
+ * Worlds. The TFT page has no upcoming match.
+ */
+function fixture(name: string): string {
+  return readFileSync(new URL(`fixtures/${name}.html`, import.meta.url), 'utf8');
+}
+
+describe('parseMatches: real Liquipedia team pages', () => {
+  const run = new Date('2026-10-26T07:00:00.000Z');
+
+  it('a page with an upcoming match gives that match', () => {
+    const match = first(parseMatches(fixture('karmine-corp-leagueoflegends'), GAME, run));
+
+    assert.equal(match.teamLeft, 'KC');
+    assert.equal(match.teamRight, 'BLG');
+    assert.equal(match.tournament.name, 'Worlds 2026 - Middle (1-1)');
+    assert.equal(
+      match.tournament.link,
+      'https://liquipedia.net/leagueoflegends/World_Championship/2026/Swiss_Stage#Middle_(1-1)',
+    );
+    assert.equal(match.date.toISOString(), '2026-10-26T18:00:00.000Z');
+  });
+
+  it('a page with no upcoming match gives no match', () => {
+    assert.deepEqual(parseMatches(fixture('karmine-corp-tft'), 'tft', run), []);
+  });
+});
 
 describe('parseMatches: reading the match carousel of a Liquipedia team page', () => {
   it('a match later today gives its teams, tournament, bracket link, date and game', () => {

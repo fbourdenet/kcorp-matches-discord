@@ -70,6 +70,6 @@ Le code suit le [Google TypeScript Style Guide](https://google.github.io/stylegu
 
 ## Crédits
 
-Les données des matchs viennent de [Liquipedia](https://liquipedia.net), sous licence [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/). Chaque récap le rappelle en pied de page.
+Les données des matchs viennent de [Liquipedia](https://liquipedia.net), sous licence [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/). Chaque récap le rappelle en pied de page. Les pages de `tests/fixtures/` sont des copies de Liquipedia, sous la même licence.
 
 Le logo `assets/kc-logo.png` appartient à la Karmine Corp. Il n'est pas couvert par la licence MIT du projet. Ce projet n'est pas officiel et n'a aucun lien avec la Karmine Corp.
