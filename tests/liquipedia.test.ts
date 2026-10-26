@@ -85,6 +85,11 @@ describe('parseMatches: real Liquipedia team pages', () => {
   it('a page with no upcoming match gives no match', () => {
     assert.deepEqual(parseMatches(fixture('karmine-corp-tft'), 'tft', run), []);
   });
+
+  it('upcoming matches in a markup the parser no longer reads fail the page', () => {
+    const html = fixture('karmine-corp-leagueoflegends').replaceAll('carousel', 'slider');
+    assert.throws(() => parseMatches(html, GAME, run), /Upcoming Matches/);
+  });
 });
 
 describe('parseMatches: reading the match carousel of a Liquipedia team page', () => {
