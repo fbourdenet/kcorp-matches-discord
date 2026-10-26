@@ -50,7 +50,9 @@ function readDate(matchInfo: Cheerio<Element>): Date | null {
  * Extracts the matches scheduled in the 24 hours after `from`.
  *
  * A team page shows its upcoming matches in a carousel, one `.carousel-item`
- * per match. tests/liquipedia.test.ts holds a copy of the expected markup.
+ * per match, under an "Upcoming Matches" heading. A page with no upcoming match
+ * has neither, so a heading with no item means the markup changed. It throws
+ * then, or the post would say there is no match. tests/fixtures holds real pages.
  *
  * It is a 24 h window, not a calendar day. The post goes out in the morning, so
  * a match at 00:30 tonight belongs in it, and one at 03:00 this morning is over.
@@ -58,8 +60,13 @@ function readDate(matchInfo: Cheerio<Element>): Date | null {
 export function parseMatches(html: string, game: GameId, from: Date): Match[] {
   const $ = cheerio.load(html);
   const matches: Match[] = [];
+  const items = $('.carousel .carousel-content .carousel-item').toArray();
 
-  for (const item of $('.carousel .carousel-content .carousel-item').toArray()) {
+  if (items.length === 0 && $('#Upcoming_Matches').length > 0) {
+    throw new Error('Section Upcoming Matches illisible, le HTML de Liquipedia a changé.');
+  }
+
+  for (const item of items) {
     const matchInfo = $(item).find('.match-info.match-info--vertical');
     const teams = readTeams(matchInfo);
     const date = readDate(matchInfo);
